@@ -125,7 +125,6 @@ def cmd_inject_detect():
             cmd_param_pattern = re.compile(r'.*' + cmd_execute_func + r'\(' + r'(.*)' + r'\)')
             multi_param_pattern = re.compile(r'.*' + cmd_execute_func + r'\(' + r'(.*?),.*' + r'\)')
 
-            # try:
             multi_param_pattern_res = multi_param_pattern.match(func_call)
             if multi_param_pattern_res:
                 if " % (" in func_call:
@@ -154,10 +153,6 @@ def cmd_inject_detect():
                 func_safe_list.append("\033[37m" + file_location + ":" + line_number +
                                       "    " + func_call + "\033[0m\n")
 
-            # except Exception as e:
-            #     print(e.__class__.__name__ + ":", e)
-            #     continue
-
         print("\n\033[34m------------------------------------ Report of func " + cmd_execute_func +
               "() ------------------------------------\033[0m\n")
         print("\033[34mfunc_total_count:" + str(func_total_count) + "\033[0m")
@@ -183,11 +178,9 @@ def cmd_inject_detect():
                 print(safe_call)
 
 
-# 判断命令字符串是否有外部注入风险
 def judge(param, file_location, line_number):
     if debug:
         print("\n\033[34m[*] Judge inject risk of: " + param + "\033[0m")
-    # 多个字符串连接
     if " % " in param:
         replace_pattern_res = replace_pattern.match(param)
         if replace_pattern_res:
@@ -238,13 +231,11 @@ def judge(param, file_location, line_number):
         else:
             return True
 
-    # format 格式化替换
     elif ".format(" in param:
         if debug:
             print("\033[33m[*] Need manual investigation: .format str format\033[0m")
         return True
 
-    # f-string 格式化字符串
     elif "f\'" in param:
         if debug:
             print("\033[33m[*] Need manual investigation: f-string str format\033[0m")
@@ -255,7 +246,6 @@ def judge(param, file_location, line_number):
             print("\033[33m[*] Need manual investigation: conditional assignment\033[0m")
         return True
 
-    # 函数调用
     elif "(" in param:
         if debug:
             print("\033[33m[*] Need manual investigation: func_call\033[0m")
@@ -272,7 +262,6 @@ def judge(param, file_location, line_number):
         return res
 
     else:
-        # 字符串常量
         if "[" in param and "]" in param:
             if debug:
                 print("\033[33m[*] Need manual investigation: variable index\033[0m")
@@ -283,7 +272,6 @@ def judge(param, file_location, line_number):
                 print("\033[32m[*] No risk: str constant\033[0m")
             return False
 
-        # 单个变量名
         else:
             param = param.strip()
             if constant_pattern.match(param):
@@ -336,7 +324,7 @@ def find_variable_content(param, file_location, line_number):
         res = param_pattern.match(code_line)
         if res:
             loop_index = index
-            # 命令是否分行
+
             if code_line[-1] == "," or code_line[-1] == "\\" or code_line[-1] == "(":
                 if code_line[-1] == "\\":
                     variable_content += res.group(1)[:-1]
